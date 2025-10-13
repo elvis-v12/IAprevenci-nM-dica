@@ -1,30 +1,24 @@
 .toast-container {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
     width: 320px;
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     overflow: hidden;
     background-color: white;
     animation: slideIn 0.4s ease;
-    z-index: 9999;
     font-family: "Segoe UI", sans-serif;
 }
 
-/* HEADER — versión más pequeña */
+/* HEADER */
 .toast-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: white;
     padding: 6px 10px;
-    /* menos padding */
+    /* compacto */
     font-weight: 600;
     font-size: 14px;
-    /* más pequeño */
     min-height: 28px;
-    /* compacto */
 }
 
 .toast-title {
@@ -55,7 +49,6 @@
     display: flex;
     align-items: center;
     padding: 10px 12px;
-    /* también reducido */
     background-color: white;
     color: #111827;
 }

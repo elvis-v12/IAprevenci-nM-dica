@@ -6,7 +6,7 @@ const Toast = ({
   message, 
   type = 1,         
   customImage, 
-  duration = 10000,
+  duration = 5000,
   onClose 
 }) => {
 

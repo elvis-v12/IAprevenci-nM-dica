@@ -4,20 +4,32 @@ import Home from "./pages/Home";
 import RegistroPaciente from "./pages/RegistroPaciente";
 import Consulta from "./pages/Consulta";
 import Historial from "./pages/Historial";
-import Toast from "./components/Toast";
+import ToastContainer from "./components/ToastContainer";
 import "./App.css";
 
 function App() {
-  const [toastData, setToastData] = useState({ show: false, msg: "", type: 1 });
+  const [toasts, setToasts] = useState([]);
 
-  const showToast = (msg, type = 1) => {
-    setToastData({ show: true, msg, type });
+  // función para agregar un nuevo toast
+  const showToast = (message, type = 1, title = "AI-Vida", image = null) => {
+    const newToast = {
+      id: Date.now(), // identificador único
+      message,
+      type,
+      title,
+      image,
+    };
+    setToasts((prev) => [...prev, newToast]);
+  };
+
+  // función para eliminar un toast
+  const removeToast = (id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
   return (
     <Router>
       <div className="app-container">
-        {/* NAVBAR */}
         <nav className="navbar">
           <h1 className="logo">AI-Vida</h1>
           <div className="nav-links">
@@ -28,7 +40,6 @@ function App() {
           </div>
         </nav>
 
-        {/* CONTENIDO PRINCIPAL */}
         <main className="content">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -38,33 +49,24 @@ function App() {
           </Routes>
 
           <div style={{ marginTop: "20px" }}>
-            <button onClick={() => showToast("Operación completada correctamente.", 1)}>
-              Info (Azul)
+            <button onClick={() => showToast("Todo correcto.", 1)}>
+              Azul (Info)
             </button>
-            <button onClick={() => showToast("Revisa los datos ingresados.", 2)}>
-              Alerta (Amarillo)
+            <button onClick={() => showToast("Advertencia detectada.", 2)}>
+              Amarillo (Alerta)
             </button>
-            <button onClick={() => showToast("Error crítico detectado.", 3)}>
-              Peligro (Rojo)
+            <button onClick={() => showToast("Error grave en el sistema.", 3)}>
+              Rojo (Peligro)
             </button>
           </div>
         </main>
 
-        {/* FOOTER */}
         <footer className="footer">
           <p>© 2025 AI-Vida | Proyecto de Prevención Médica Inteligente</p>
         </footer>
 
-        {/* TOAST */}
-        {toastData.show && (
-          <Toast
-            title="AI-Vida"
-            message={toastData.msg}
-            type={toastData.type}
-            image="/logo.png" // puedes poner cualquier icono o imagen
-            onClose={() => setToastData({ ...toastData, show: false })}
-          />
-        )}
+        {/* 🔥 Contenedor de todos los toasts */}
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
       </div>
     </Router>
   );
