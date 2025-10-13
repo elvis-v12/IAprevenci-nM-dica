@@ -1,0 +1,87 @@
+.toast-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 320px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    background-color: white;
+    animation: slideIn 0.4s ease;
+    z-index: 9999;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* HEADER — versión más pequeña */
+.toast-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    padding: 6px 10px;
+    /* menos padding */
+    font-weight: 600;
+    font-size: 14px;
+    /* más pequeño */
+    min-height: 28px;
+    /* compacto */
+}
+
+.toast-title {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    margin-left: 6px;
+    transition: transform 0.2s ease;
+}
+
+.toast-close:hover {
+    transform: scale(1.2);
+}
+
+/* BODY */
+.toast-body {
+    display: flex;
+    align-items: center;
+    padding: 10px 12px;
+    /* también reducido */
+    background-color: white;
+    color: #111827;
+}
+
+.toast-img {
+    width: 40px;
+    height: 40px;
+    margin-right: 10px;
+    object-fit: contain;
+}
+
+.toast-text {
+    font-size: 14px;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Animación */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
