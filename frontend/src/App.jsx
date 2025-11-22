@@ -1,15 +1,35 @@
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { useState } from "react";
 import Home from "./pages/Home";
 import RegistroPaciente from "./pages/RegistroPaciente";
 import Consulta from "./pages/Consulta";
 import Historial from "./pages/Historial";
+import ToastContainer from "./components/ToastContainer";
 import "./App.css";
 
 function App() {
+  const [toasts, setToasts] = useState([]);
+
+  // función para agregar un nuevo toast
+  const showToast = (message, type = 1, title = "AI-Vida", image = null) => {
+    const newToast = {
+      id: Date.now(), // identificador único
+      message,
+      type,
+      title,
+      image,
+    };
+    setToasts((prev) => [...prev, newToast]);
+  };
+
+  // función para eliminar un toast
+  const removeToast = (id) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
   return (
     <Router>
       <div className="app-container">
-        {/* NAVBAR */}
         <nav className="navbar">
           <h1 className="logo">AI-Vida</h1>
           <div className="nav-links">
@@ -20,7 +40,6 @@ function App() {
           </div>
         </nav>
 
-        {/* CONTENIDO PRINCIPAL */}
         <main className="content">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -28,12 +47,26 @@ function App() {
             <Route path="/consulta" element={<Consulta />} />
             <Route path="/historial" element={<Historial />} />
           </Routes>
+
+          <div style={{ marginTop: "20px" }}>
+            <button onClick={() => showToast("Todo correcto.", 1)}>
+              Azul (Info)
+            </button>
+            <button onClick={() => showToast("Advertencia detectada.", 2)}>
+              Amarillo (Alerta)
+            </button>
+            <button onClick={() => showToast("Error grave en el sistema.", 3)}>
+              Rojo (Peligro)
+            </button>
+          </div>
         </main>
 
-        {/* FOOTER */}
         <footer className="footer">
           <p>© 2025 AI-Vida | Proyecto de Prevención Médica Inteligente</p>
         </footer>
+
+        {/* 🔥 Contenedor de todos los toasts */}
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
       </div>
     </Router>
   );
