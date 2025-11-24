@@ -1,0 +1,27 @@
+spring:
+  application:
+    name: backend-ia-medico
+
+server:
+  servlet:
+    context-path: /backend-ia-medico
+
+jpa:
+  hibernate:
+    ddl-auto: ${JPA_DDL_AUTO:update}
+  show-sql: ${SHOW_SQL:true}
+  properties:
+    hibernate:
+      format_sql: true
+
+logging:
+  level:
+    org:
+      springframework:
+        security: TRACE
+
+security:
+  jwt:
+    key: key-backend
+    user: backend-ia-medico
+    expiration_minutes: 30

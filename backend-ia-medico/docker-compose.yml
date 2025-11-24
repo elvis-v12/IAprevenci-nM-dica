@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: med_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: meddb
+      MYSQL_USER: meduser
+      MYSQL_PASSWORD: medpass
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: med_app
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DB_URL: jdbc:mysql://db:3306/meddb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USERNAME: meduser
+      DB_PASSWORD: medpass
+      JPA_DDL_AUTO: update
+      SHOW_SQL: "true"
+    ports:
+      - "8081:8080"
+
+volumes:
+  db_data:
