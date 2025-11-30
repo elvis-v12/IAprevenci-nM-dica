@@ -42,8 +42,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/patient/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/patient/register").permitAll()
                         // PROTECTED
+                        .requestMatchers(HttpMethod.POST, "/report").authenticated()
                         // REMAINING
-                        .anyRequest().denyAll())
+                        .anyRequest().permitAll())
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(customAuthenticationEntryPointHandler)
                         .accessDeniedHandler(customAccessDeniedHandler))
