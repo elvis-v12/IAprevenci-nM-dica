@@ -1,17 +1,18 @@
 /* Contenedor general que se mantiene fijo en pantalla */
 .toast-stack {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    display: flex;
-    flex-direction: column; /* los antiguos arriba, nuevos abajo */
-    gap: 10px;
-    z-index: 9999;
-    pointer-events: none; /* permite clics detrás */
-  }
-  
-  /* Permite clics dentro de cada toast */
-  .toast-stack > * {
-    pointer-events: all;
-  }
-  
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  /* los antiguos arriba, nuevos abajo */
+  gap: 10px;
+  z-index: 9999;
+  pointer-events: none;
+  /* permite clics detrás */
+}
+
+/* Permite clics dentro de cada toast */
+.toast-stack>* {
+  pointer-events: all;
+}
