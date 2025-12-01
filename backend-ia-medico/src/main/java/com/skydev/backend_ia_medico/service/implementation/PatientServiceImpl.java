@@ -70,7 +70,6 @@ public class PatientServiceImpl implements PatientService {
 
     }
 
-    @Transactional(readOnly = true)
     public Authentication authenticate(String username, String password) {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
