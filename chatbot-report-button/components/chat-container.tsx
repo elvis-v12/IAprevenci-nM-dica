@@ -12,6 +12,7 @@ export interface ChatMessage {
   id: string
   role: "user" | "bot"
   content: string
+  hiddenContent?: string // Only for bot messages - formatted text for API endpoints
   timestamp: string
 }
 
@@ -49,20 +50,79 @@ export function ChatContainer() {
     setLoading(true)
 
     try {
-      // Simulación de respuesta del bot
-      // En producción, esto iría a tu endpoint de backend
-      setTimeout(() => {
-        const botMessage: ChatMessage = {
-          id: (Date.now() + 1).toString(),
-          role: "bot",
-          content: `Echo: ${input}`,
-          timestamp: new Date().toISOString(),
-        }
-        setMessages((prev) => [...prev, botMessage])
-        setLoading(false)
-      }, 500)
+      // Parsear el mensaje del usuario para extraer name, age y symptoms
+      // Formato esperado: "Hola, me llamo [name], tengo [age] y mis sintomas son [symptoms]"
+
+      let name = ""
+      let age = ""
+      let symptoms = ""
+
+      // Extraer el nombre después de "llamo"
+      const nameMatch = input.match(/llamo\s+(\w+)/i)
+      if (nameMatch) {
+        name = nameMatch[1]
+      }
+
+      // Extraer la edad después de "tengo"
+      const ageMatch = input.match(/tengo\s+(\d+)/i)
+      if (ageMatch) {
+        age = ageMatch[1]
+      }
+
+      // Extraer los síntomas después de "son" (todo lo que queda)
+      const symptomsMatch = input.match(/son\s+(.+)$/i)
+      if (symptomsMatch) {
+        symptoms = symptomsMatch[1].trim()
+      }
+
+      // Llamar al endpoint del bot
+      const response = await fetch("http://127.0.0.1:8000/triaje", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          name: name,
+          age: age,
+          symptoms: symptoms
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Error al comunicarse con el bot")
+      }
+
+      const data = await response.json()
+
+      // Parsear la respuesta usando "%%%" como separador
+      let resultado = data.resultado || ""
+
+      // Formatear el texto: quitar asteriscos y saltos de línea
+      resultado = resultado.replace(/\*/g, "").replace(/\\n/g, " ")
+
+      const [visibleContent, hiddenContent] = resultado.split("%%%")
+
+      const botMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "bot",
+        content: visibleContent.trim(), // Mensaje visible en el chat
+        hiddenContent: hiddenContent ? hiddenContent.trim() : undefined, // Mensaje oculto para endpoint (opcional)
+        timestamp: new Date().toISOString(),
+      }
+
+      setMessages((prev) => [...prev, botMessage])
+      setLoading(false)
     } catch (error) {
       console.error("Error sending message:", error)
+
+      // Mensaje de error al usuario
+      const errorMessage: ChatMessage = {
+        id: (Date.now() + 1).toString(),
+        role: "bot",
+        content: "Lo siento, hubo un error al procesar tu mensaje. Por favor, intenta de nuevo.",
+        timestamp: new Date().toISOString(),
+      }
+      setMessages((prev) => [...prev, errorMessage])
       setLoading(false)
     }
   }
@@ -70,36 +130,58 @@ export function ChatContainer() {
   const handlePrintReport = async () => {
     setExportingReport(true)
     try {
-      const reportData = messages.map((msg) => ({
-        timestamp: msg.timestamp,
-        author: msg.role === "user" ? user?.email || "Usuario" : "Bot Médico",
-        message: msg.content,
-      }))
+      // Filtrar solo los mensajes del bot que tengan contenido oculto
+      const botMessagesWithHiddenContent = messages.filter(
+        (msg) => msg.role === "bot" && msg.hiddenContent
+      )
+
+      // Procesar cada mensaje oculto del bot
+      const reportData = botMessagesWithHiddenContent.map((msg) => {
+        // Separar el hiddenContent por el símbolo "|"
+        const parts = msg.hiddenContent!.split("|")
+
+        return {
+          title: parts[0]?.trim() || "",
+          userMsg: parts[1]?.trim() || "",
+          risk: parts[2]?.trim() || "",
+          respIA: parts[3]?.trim() || "",
+          recommendationIA: parts[4]?.trim() || "",
+        }
+      })
 
       // Llamar al endpoint de reporte
-      const response = await fetch("http://localhost:8080/api/report/generate", {
+      const response = await fetch("http://localhost:8082/backend-ia-medico/report", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          chatHistory: reportData,
-          generatedAt: new Date().toISOString(),
-          userId: user?.email,
-        }),
+        body: JSON.stringify(reportData),
       })
 
       if (!response.ok) {
-        throw new Error("Error generating report")
+        throw new Error("Error al generar el reporte")
       }
 
-      const data = await response.json()
-      console.log("Report generated:", data)
-      alert("Reporte generado exitosamente")
+      // Convertir la respuesta a blob (archivo binario)
+      const blob = await response.blob()
+
+      // Crear un enlace temporal para descargar el PDF
+      const url = window.URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      link.href = url
+      link.download = `reporte-medico-${new Date().getTime()}.pdf`
+      document.body.appendChild(link)
+      link.click()
+
+      // Limpiar el enlace temporal
+      document.body.removeChild(link)
+      window.URL.revokeObjectURL(url)
+
+      console.log("Report downloaded successfully")
     } catch (error) {
       console.error("Error generating report:", error)
-      alert("Error al generar el reporte")
+      alert("Error al generar el reporte. Por favor, intenta de nuevo.")
     } finally {
       setExportingReport(false)
     }
@@ -178,11 +260,10 @@ export function ChatContainer() {
           messages.map((message) => (
             <div key={message.id} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
               <div
-                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${
-                  message.role === "user"
-                    ? "bg-primary text-primary-foreground rounded-br-none"
-                    : "bg-muted text-muted-foreground border border-border rounded-bl-none"
-                }`}
+                className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${message.role === "user"
+                  ? "bg-primary text-primary-foreground rounded-br-none"
+                  : "bg-muted text-muted-foreground border border-border rounded-bl-none"
+                  }`}
               >
                 <p className="text-sm leading-relaxed">{message.content}</p>
                 <p className="text-xs mt-2 opacity-70">{new Date(message.timestamp).toLocaleTimeString("es-ES")}</p>

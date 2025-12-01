@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent"
+GEMINI_URL = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent"
 
 app = FastAPI(title="Prevención Médica Inteligente")
 
@@ -25,7 +25,9 @@ def home():
 @app.post("/triaje")
 def triaje(data: Symptoms):
     prompt = f"Paciente {data.name}, {data.age} años, síntomas: {data.symptoms}. " \
-             f"Evalúa nivel de riesgo (leve, moderado, crítico) y da una recomendación inicial breve."
+             f"Primero responde en un mensaje de párrafo breve para el usuario, " \
+             f"luego responde en el formato 'titulo|mis sintomas|riesgo(leve,mediano,critico)|Causa|Recomendacion'. " \
+             f"Separa las dos respuestas con '%%%'. Evalúa el nivel de riesgo y da una recomendación inicial."
 
     response = requests.post(
         GEMINI_URL,
