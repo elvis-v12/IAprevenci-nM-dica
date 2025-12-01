@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       try {
-        const response = await fetch("http://localhost:8080/api/auth/login", {
+        const response = await fetch("http://localhost:8082/patient/login", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = async (email: string, password: string) => {
     try {
       try {
-        const response = await fetch("http://localhost:8080/api/auth/register", {
+        const response = await fetch("http://localhost:8082/patient/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),
