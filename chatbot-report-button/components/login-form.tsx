@@ -10,6 +10,11 @@ import { Activity } from "lucide-react"
 export function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [firstName, setFirstName] = useState("")
+  const [lastName, setLastName] = useState("")
+  const [birthDate, setBirthDate] = useState("")
+  const [documentNumber, setDocumentNumber] = useState("")
+  const [phone, setPhone] = useState("")
   const [error, setError] = useState("")
   const [isRegister, setIsRegister] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -22,7 +27,7 @@ export function LoginForm() {
 
     try {
       if (isRegister) {
-        await register(email, password)
+        await register(email, password, firstName, lastName, birthDate, documentNumber, phone)
       } else {
         await login(email, password)
       }
@@ -66,6 +71,49 @@ export function LoginForm() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+          {isRegister && (
+            <>
+              <Input
+                type="text"
+                placeholder="Nombres"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+              />
+
+              <Input
+                type="text"
+                placeholder="Apellidos"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                required
+              />
+
+              <Input
+                type="date"
+                placeholder="Fecha de nacimiento"
+                value={birthDate}
+                onChange={(e) => setBirthDate(e.target.value)}
+                required
+              />
+
+              <Input
+                type="text"
+                placeholder="Número de documento"
+                value={documentNumber}
+                onChange={(e) => setDocumentNumber(e.target.value)}
+                required
+              />
+
+              <Input
+                type="tel"
+                placeholder="Teléfono"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </>
+          )}
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Cargando..." : isRegister ? "Registrarse" : "Entrar"}
           </Button>

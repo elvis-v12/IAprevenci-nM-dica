@@ -6,7 +6,15 @@ export interface AuthContextType {
   user: any
   token: string | null
   login: (email: string, password: string) => Promise<void>
-  register: (email: string, password: string) => Promise<void>
+  register: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    birthDate: string,
+    documentNumber: string,
+    phone: string
+  ) => Promise<void>
   logout: () => void
   loading: boolean
 }
@@ -19,8 +27,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const savedToken = localStorage.getItem("authToken")
-    const savedUser = localStorage.getItem("authUser")
+    const savedToken = localStorage.getItem("jwtToken")
+    const savedUser = localStorage.getItem("user")
     if (savedToken && savedUser) {
       setToken(savedToken)
       setUser(JSON.parse(savedUser))
@@ -29,89 +37,67 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = async (email: string, password: string) => {
-    try {
-      try {
-        const response = await fetch("http://localhost:8082/backend-ia-medico/patient/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        })
-
-        if (!response.ok) {
-          throw new Error("Login failed")
-        }
-
-        const data = await response.json()
-        const newToken = data.token
-        const userData = { email }
-
-        setToken(newToken)
-        setUser(userData)
-        localStorage.setItem("authToken", newToken)
-        localStorage.setItem("authUser", JSON.stringify(userData))
-      } catch (backendError) {
-        console.warn("[v0] Backend no disponible, usando modo demo")
-        // Fallback a modo demo/desarrollo
-        const demoToken = `demo_token_${Date.now()}`
-        const userData = { email }
-
-        setToken(demoToken)
-        setUser(userData)
-        localStorage.setItem("authToken", demoToken)
-        localStorage.setItem("authUser", JSON.stringify(userData))
+    const response = await fetch(
+      "http://localhost:8082/backend-ia-medico/patient/login",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       }
-    } catch (error) {
-      console.error("[v0] Login error:", error)
-      throw error
-    }
+    )
+    if (!response.ok) throw new Error("Login failed")
+    const data = await response.json()
+    setToken(data.jwtToken)
+    setUser(data.user)
+    localStorage.setItem("jwtToken", data.jwtToken)
+    localStorage.setItem("user", JSON.stringify(data.user))
   }
 
-  const register = async (email: string, password: string) => {
-    try {
-      try {
-        const response = await fetch("http://localhost:8082/backend-ia-medico/patient/register", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
-        })
-
-        if (!response.ok) {
-          throw new Error("Register failed")
-        }
-
-        const data = await response.json()
-        const newToken = data.token
-        const userData = { email }
-
-        setToken(newToken)
-        setUser(userData)
-        localStorage.setItem("authToken", newToken)
-        localStorage.setItem("authUser", JSON.stringify(userData))
-      } catch (backendError) {
-        console.warn("[v0] Backend no disponible, usando modo demo")
-        // Fallback a modo demo/desarrollo
-        const demoToken = `demo_token_${Date.now()}`
-        const userData = { email }
-
-        setToken(demoToken)
-        setUser(userData)
-        localStorage.setItem("authToken", demoToken)
-        localStorage.setItem("authUser", JSON.stringify(userData))
+  const register = async (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    birthDate: string,
+    documentNumber: string,
+    phone: string
+  ) => {
+    const response = await fetch(
+      "http://localhost:8082/backend-ia-medico/patient/register",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password,
+          firstName,
+          lastName,
+          birthDate,
+          documentNumber,
+          phone,
+        }),
       }
-    } catch (error) {
-      console.error("[v0] Register error:", error)
-      throw error
-    }
+    )
+    if (!response.ok) throw new Error("Register failed")
+    const data = await response.json()
+    setToken(data.jwtToken)
+    setUser(data.user)
+    localStorage.setItem("jwtToken", data.jwtToken)
+    localStorage.setItem("user", JSON.stringify(data.user))
   }
 
   const logout = () => {
     setUser(null)
     setToken(null)
-    localStorage.removeItem("authToken")
-    localStorage.removeItem("authUser")
+    localStorage.removeItem("jwtToken")
+    localStorage.removeItem("user")
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, register, logout, loading }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider
+      value={{ user, token, login, register, logout, loading }}
+    >
+      {children}
+    </AuthContext.Provider>
   )
 }
